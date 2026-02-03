@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pricing Snapshot · AI Cost Manager</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="breadcrumbs"><a href="index.html">Dashboard</a> · Pricing Snapshot</p>
+          <h1>Pricing Snapshot</h1>
+          <p class="subtitle">
+            토큰 구간별 원가, 마진 램프(5%→10%→20%), 고객 규모(1k/10k/100k) 기준으로
+            가격 설계를 빠르게 검증합니다.
+          </p>
+          <div class="hero-actions">
+            <a class="ghost" href="index.html">Back to Dashboard</a>
+            <a class="ghost" href="decision.html">Price Decision Maker</a>
+            <button class="primary" type="button">Download PDF</button>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h3>Pricing Assumptions</h3>
+          <ul>
+            <li>FX Rate: <strong>1 USD = 1,450 KRW</strong></li>
+            <li>Margin Ramp: <strong>5% → 10% → 20%</strong></li>
+            <li>Volume Tiers: <strong>1k / 10k / 100k</strong></li>
+          </ul>
+          <div class="hero-footnote" id="pricing-as-of"></div>
+        </div>
+      </header>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Pricing Formula</h3>
+            <p class="muted">원가 기반 가격 산정 공식과 마진 램프 적용.</p>
+          </div>
+          <div class="pill">Core Logic</div>
+        </div>
+        <div class="detail-grid">
+          <div>
+            <div class="formula">
+              Cost/request (KRW) = (InputTokens × InputRate + OutputTokens × OutputRate) / 1,000,000 × FX
+              <br />
+              Price/request = Cost/request / (1 - Margin)
+              <br />
+              Monthly Cost = Cost/request × Requests
+            </div>
+          </div>
+          <div class="detail-card">
+            <h4>Margin Ramp Multipliers</h4>
+            <p class="muted">마진 목표를 빠르게 적용할 때 사용하는 배수.</p>
+            <ul>
+              <li>5%: × 1.053</li>
+              <li>10%: × 1.111</li>
+              <li>20%: × 1.25</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Model Cost Bands</h3>
+            <p class="muted">모델 티어별 요청당 원가(KRW).</p>
+          </div>
+          <div class="pill">Token Scenarios</div>
+        </div>
+        <div class="table-wrap">
+          <table id="pricing-cost-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Model</th>
+                <th>Tier</th>
+                <th>Small (1k/0.5k)</th>
+                <th>Medium (5k/2k)</th>
+                <th>Large (20k/5k)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="grid two">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h3>Volume-Based Pricing</h3>
+              <p class="muted">요청 규모별 월 가격(마진 포함).</p>
+            </div>
+            <div class="pill">1k / 10k / 100k</div>
+          </div>
+          <div class="controls">
+            <label>
+              Model
+              <select id="pricing-model"></select>
+            </label>
+            <label>
+              Token Size
+              <select id="pricing-size">
+                <option value="small">Small (1k/0.5k)</option>
+                <option value="medium" selected>Medium (5k/2k)</option>
+                <option value="large">Large (20k/5k)</option>
+              </select>
+            </label>
+            <label>
+              Margin
+              <select id="pricing-margin">
+                <option value="0.05">5%</option>
+                <option value="0.1">10%</option>
+                <option value="0.2">20%</option>
+              </select>
+            </label>
+          </div>
+          <div class="stat-grid" id="pricing-volume-output"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h3>Plan Design Notes</h3>
+              <p class="muted">플랜 구성 시 체크해야 할 포인트.</p>
+            </div>
+            <div class="pill">Checklist</div>
+          </div>
+          <div class="tag-list">
+            <div class="tag">Starter/Pro/Enterprise</div>
+            <div class="tag">Usage Overage</div>
+            <div class="tag">Seat + Usage</div>
+            <div class="tag">Grandfathering</div>
+            <div class="tag">SLA/Support</div>
+          </div>
+          <div class="detail-card" style="margin-top: 16px;">
+            <p class="muted">런칭 후 3개월은 낮은 마진으로 시작하고, 3개월 단위로 마진을 상향합니다.</p>
+            <ul>
+              <li>0-3개월: 5% 마진</li>
+              <li>4-6개월: 10% 마진</li>
+              <li>7-9개월: 20% 마진</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Appendix: Pricing Sources</h3>
+            <p class="muted">모델 단가 기준과 적용 조건을 요약합니다.</p>
+          </div>
+          <div class="pill">References</div>
+        </div>
+        <ul>
+          <li>OpenAI API Pricing: GPT-5 계열 입력/출력 단가 (As of 2026-02-03)</li>
+          <li>Anthropic Pricing: Claude Opus/Sonnet/Haiku 단가 (As of 2026-02-03)</li>
+          <li>Google AI Pricing: Gemini 3 Pro/Flash, 2.5 Flash-Lite 단가 (As of 2026-02-03)</li>
+          <li>Z.AI Pricing: GLM-4.7/4.7-FlashX/4.5-Air 단가 (As of 2026-02-03)</li>
+          <li>DeepSeek Pricing: deepseek-chat / deepseek-reasoner 단가 (As of 2026-02-03)</li>
+          <li>Alibaba Cloud Model Studio: Qwen3-Max/Qwen-Plus 단가 (As of 2026-02-03)</li>
+          <li>LMArena Text Leaderboard: 모델 퀄리티 참고 (As of 2026-01-29)</li>
+        </ul>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>API Cost Reduction Options</h3>
+            <p class="muted">가격 전략과 함께 적용할 비용 최적화 레버.</p>
+          </div>
+          <div class="pill">Optimization</div>
+        </div>
+        <div class="matrix">
+          <div>
+            <h4>Model Tiering</h4>
+            <p>난이도에 따라 모델 티어를 분리해 평균 단가 절감.</p>
+          </div>
+          <div>
+            <h4>Prompt Hygiene</h4>
+            <p>불필요한 컨텍스트/로그를 제거해 입력 토큰 축소.</p>
+          </div>
+          <div>
+            <h4>Output Control</h4>
+            <p>최대 출력 길이 제한으로 예산 초과 방지.</p>
+          </div>
+          <div>
+            <h4>Cache & Recompute</h4>
+            <p>반복 요청을 캐시하고, 변경 시에만 재호출.</p>
+          </div>
+          <div>
+            <h4>Rate & Quota</h4>
+            <p>팀/기능별 쿼터를 적용해 비용 폭주 방지.</p>
+          </div>
+          <div>
+            <h4>Offline Eval</h4>
+            <p>오프라인 평가로 실제 운영 호출 수 감소.</p>
+          </div>
+          <div>
+            <h4>Tool Pruning</h4>
+            <p>잘 사용되지 않는 툴/기능을 축소.</p>
+          </div>
+          <div>
+            <h4>Latency Tradeoff</h4>
+            <p>속도/비용 균형을 맞춘 모델 선택.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Cost Manager for AI · Pricing Snapshot</p>
+        <p class="muted">Local preview on port 8000.</p>
+      </footer>
+    </div>
+
+    <script src="assets/data.js"></script>
+    <script src="assets/pricing.js"></script>
+  </body>
+</html>

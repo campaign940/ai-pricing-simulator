@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Price Decision Maker · AI Cost Manager</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="breadcrumbs"><a href="index.html">Dashboard</a> · Price Decision Maker</p>
+          <h1>AI Price Decision Maker</h1>
+          <p class="subtitle">
+            제품 코드와 명세를 입력하면 1안·2안·3안 가격 정책을 추천합니다. 과금 방식(One-time / Monthly / Usage),
+            과금 금액, 무료 이용 구간을 함께 제안합니다.
+          </p>
+          <div class="hero-actions">
+            <a class="ghost" href="index.html">Back to Dashboard</a>
+            <a class="primary" href="pricing.html">Pricing Snapshot</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h3>Decision Inputs</h3>
+          <ul>
+            <li>FX Rate: <strong>1 USD = 1,450 KRW</strong></li>
+            <li>Decision Modes: <strong>One-time · Monthly · Usage</strong></li>
+            <li>Analysis: <strong>Keyword-based estimate</strong></li>
+          </ul>
+          <div class="hero-footnote" id="decision-as-of"></div>
+        </div>
+      </header>
+
+      <section class="decision-grid">
+        <div class="card decision-input">
+          <div class="section-head">
+            <div>
+              <h3>제품 입력</h3>
+              <p class="muted">코드와 명세를 기반으로 난이도와 토큰을 추정합니다.</p>
+            </div>
+            <div class="pill">Input</div>
+          </div>
+          <label>
+            제품 코드 (Logic)
+            <textarea
+              id="decision-code"
+              class="decision-textarea"
+              placeholder="API 호출 로직, 프롬프트 처리, 핵심 함수를 입력하세요..."
+            ></textarea>
+          </label>
+          <label>
+            제품 명세 (Spec)
+            <textarea
+              id="decision-spec"
+              class="decision-textarea small"
+              placeholder="제품 기능, 데이터 처리 방식, 사용자 플로우를 설명하세요..."
+            ></textarea>
+          </label>
+          <label>
+            분석 기준 모델
+            <select id="decision-model"></select>
+          </label>
+          <button id="decision-run" class="primary decision-btn" type="button">가격 정책 제안받기</button>
+          <p class="muted small">코드 또는 명세 중 하나라도 입력하면 분석 가능합니다.</p>
+        </div>
+
+        <div class="decision-output">
+          <div id="decision-empty" class="card decision-empty">
+            <h3>분석 결과가 여기에 표시됩니다.</h3>
+            <p class="muted">제품 코드/명세를 입력하고 버튼을 누르면 추천이 생성됩니다.</p>
+          </div>
+
+          <div id="decision-result" class="decision-result hidden">
+            <div class="decision-banner" id="decision-summary"></div>
+            <div class="decision-cards" id="decision-cards"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Cost Manager for AI · Price Decision Maker</p>
+        <p class="muted">Local preview on port 3500.</p>
+      </footer>
+    </div>
+
+    <script src="assets/data.js"></script>
+    <script src="assets/decision.js"></script>
+  </body>
+</html>

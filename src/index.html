@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Cost Manager Dashboard</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Cost Manager · Pricing Strategy</p>
+          <h1>AI Product Pricing Dashboard</h1>
+          <p class="subtitle">
+            B2C 과금 방식(One-time · Monthly · Usage)과 모델 단가/퀄리티를 한 화면에서
+            연결합니다. 환율과 평균 토큰 사용량을 바꾸면 모든 계산이 즉시 갱신됩니다.
+          </p>
+          <div class="hero-actions">
+            <a class="primary" href="pricing.html">Pricing Snapshot</a>
+            <a class="ghost" href="decision.html">Price Decision Maker</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h3>Key Inputs</h3>
+          <ul>
+            <li>
+              Exchange Rate:
+              <strong><input id="fx-rate" class="inline-input" type="number" min="500" step="10" /></strong>
+            </li>
+            <li>Customer Scale: <strong>1k / 10k / 100k</strong> requests</li>
+            <li>Margin Ramp: <strong>5% → 10% → 20%</strong></li>
+          </ul>
+          <div class="hero-footnote" id="as-of"></div>
+        </div>
+      </header>
+
+      <section class="grid" id="kpi">
+        <div class="card">
+          <p class="label">Margin Phase 1</p>
+          <h2>5%</h2>
+          <p class="muted">Launch window (0-3 months)</p>
+        </div>
+        <div class="card">
+          <p class="label">Margin Phase 2</p>
+          <h2>10%</h2>
+          <p class="muted">Growth window (4-6 months)</p>
+        </div>
+        <div class="card">
+          <p class="label">Margin Phase 3</p>
+          <h2>20%</h2>
+          <p class="muted">Stabilization (7-9 months)</p>
+        </div>
+        <div class="card">
+          <p class="label">Pricing Unit</p>
+          <h2>Multi-metric</h2>
+          <p class="muted">Token, request, seat, job</p>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Token Price Matrix (USD / 1M tokens)</h3>
+            <p class="muted">입력/출력 토큰 단가와 퀄리티 지표를 함께 봅니다.</p>
+          </div>
+          <div class="pill">Input / Output</div>
+        </div>
+        <div class="table-wrap">
+          <table id="token-price-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Model</th>
+                <th>Tier</th>
+                <th>Input</th>
+                <th>Output</th>
+                <th>Quality (LMArena)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="footnote">
+          * 단가는 표준 처리(캐시 미적용) 기준입니다. DeepSeek는 cache miss 단가, Gemini 3은 ≤200K prompt 구간,
+          Qwen3-Max는 ≤32K 입력 구간, Z.AI는 공식 GLM 가격표를 사용합니다.
+        </p>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Model Cost Bands (KRW / request)</h3>
+            <p class="muted">Token size별 요청 원가를 자동 계산합니다.</p>
+          </div>
+          <div class="pill">Token Scenarios</div>
+        </div>
+        <div class="table-wrap">
+          <table id="cost-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Model</th>
+                <th>Tier</th>
+                <th>Small (1k/0.5k)</th>
+                <th>Medium (5k/2k)</th>
+                <th>Large (20k/5k)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="grid two">
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h3>Volume Cost Calculator</h3>
+              <p class="muted">고객 규모별 월 원가를 계산합니다.</p>
+            </div>
+            <div class="pill">1k / 10k / 100k</div>
+          </div>
+          <div class="controls">
+            <label>
+              Model
+              <select id="volume-model"></select>
+            </label>
+            <label>
+              Token Size
+              <select id="volume-size">
+                <option value="small">Small (1k/0.5k)</option>
+                <option value="medium" selected>Medium (5k/2k)</option>
+                <option value="large">Large (20k/5k)</option>
+              </select>
+            </label>
+          </div>
+          <div class="stat-grid" id="volume-output"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <div>
+              <h3>Margin Ramp Pricing</h3>
+              <p class="muted">요청당 원가에 마진 램프를 반영합니다.</p>
+            </div>
+            <div class="pill">5% → 10% → 20%</div>
+          </div>
+          <div class="controls">
+            <label>
+              Model
+              <select id="margin-model"></select>
+            </label>
+            <label>
+              Token Size
+              <select id="margin-size">
+                <option value="small">Small (1k/0.5k)</option>
+                <option value="medium" selected>Medium (5k/2k)</option>
+                <option value="large">Large (20k/5k)</option>
+              </select>
+            </label>
+          </div>
+          <div class="stat-grid" id="margin-output"></div>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>B2C Pricing Simulator</h3>
+            <p class="muted">One-time · Monthly · Usage 과금에 맞는 권장 가격을 계산합니다.</p>
+          </div>
+          <div class="pill">One-time · Subscription · Usage</div>
+        </div>
+        <div class="controls three">
+          <label>
+            Model
+            <select id="b2c-model"></select>
+          </label>
+          <label>
+            Avg Input Tokens
+            <input id="b2c-in-tokens" type="number" min="0" step="100" />
+          </label>
+          <label>
+            Avg Output Tokens
+            <input id="b2c-out-tokens" type="number" min="0" step="100" />
+          </label>
+          <label>
+            Margin Target
+            <select id="b2c-margin"></select>
+          </label>
+          <label>
+            One-time Pack (requests)
+            <input id="b2c-pack" type="number" min="1" step="10" />
+          </label>
+          <label>
+            Monthly Included (requests)
+            <input id="b2c-monthly" type="number" min="1" step="10" />
+          </label>
+        </div>
+        <div class="detail-card" id="b2c-cost-summary"></div>
+        <div class="pricing-grid" id="b2c-output"></div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Strategy Recommendations</h3>
+            <p class="muted">가장 싼 모델, 최고 퀄리티 모델, LMArena 1450+ 기준 합리 모델을 비교합니다.</p>
+          </div>
+          <div class="pill">Cheapest · Quality · Reasonable</div>
+        </div>
+        <div class="recommend-grid" id="recommendation-output"></div>
+        <div class="detail-card" id="best-solution"></div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Model Routing Mix</h3>
+            <p class="muted">모델별 가중치를 섞어 평균 단가를 시뮬레이션합니다.</p>
+          </div>
+          <div class="pill">Weighted Routing</div>
+        </div>
+        <div class="controls route">
+          <label>
+            Model A
+            <select id="route-model-a"></select>
+          </label>
+          <label>
+            Weight A (%)
+            <input id="route-weight-a" class="weight-input" type="number" min="0" step="5" />
+          </label>
+          <label>
+            Model B
+            <select id="route-model-b"></select>
+          </label>
+          <label>
+            Weight B (%)
+            <input id="route-weight-b" class="weight-input" type="number" min="0" step="5" />
+          </label>
+          <label>
+            Model C
+            <select id="route-model-c"></select>
+          </label>
+          <label>
+            Weight C (%)
+            <input id="route-weight-c" class="weight-input" type="number" min="0" step="5" />
+          </label>
+        </div>
+        <div class="detail-card" id="routing-output"></div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>Pricing Metrics Matrix</h3>
+            <p class="muted">과금 단위별 설계 포인트를 요약합니다.</p>
+          </div>
+          <div class="pill">Multi-metric</div>
+        </div>
+        <div class="matrix">
+          <div>
+            <h4>Per Token</h4>
+            <p>원가 정합성 최고. 예측 난이도는 높음.</p>
+          </div>
+          <div>
+            <h4>Per Request</h4>
+            <p>사용자 이해 쉬움. 토큰 변동성 리스크 관리 필요.</p>
+          </div>
+          <div>
+            <h4>Per Seat + Usage</h4>
+            <p>B2B 표준 패키징. 포함량/초과 단가 설계 중요.</p>
+          </div>
+          <div>
+            <h4>Per Job/Document</h4>
+            <p>워크플로우형 제품에 적합. 작업 편차 감안 필요.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="section-head">
+          <div>
+            <h3>API Cost Reduction Options</h3>
+            <p class="muted">즉시 적용 가능한 비용 절감 레버를 정리합니다.</p>
+          </div>
+          <div class="pill">Optimization</div>
+        </div>
+        <div class="matrix">
+          <div>
+            <h4>Model Routing</h4>
+            <p>고난도/프리미엄 요청만 고가 모델로 라우팅.</p>
+          </div>
+          <div>
+            <h4>Prompt Compression</h4>
+            <p>시스템/컨텍스트 프롬프트를 요약해 입력 토큰 감소.</p>
+          </div>
+          <div>
+            <h4>Response Caps</h4>
+            <p>출력 토큰 상한으로 비용 스파이크 방지.</p>
+          </div>
+          <div>
+            <h4>Prompt Cache</h4>
+            <p>재사용 컨텍스트를 캐시해 입력 비용 절감.</p>
+          </div>
+          <div>
+            <h4>Batching</h4>
+            <p>Batch API로 단가 할인 및 호출 수 감소.</p>
+          </div>
+          <div>
+            <h4>LoRA / PEFT</h4>
+            <p>작은 모델을 파인튜닝해 고가 모델 호출 감소.</p>
+          </div>
+          <div>
+            <h4>Distill & Prune</h4>
+            <p>고가 모델 응답을 증류해 저가 모델로 전환.</p>
+          </div>
+          <div>
+            <h4>Guardrails</h4>
+            <p>실패/재시도율을 낮춰 무의미한 비용을 절감.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Cost Manager for AI · Pricing Dashboard v0.1</p>
+        <p class="muted">Local preview on port 8000.</p>
+      </footer>
+    </div>
+
+    <script src="assets/data.js"></script>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
