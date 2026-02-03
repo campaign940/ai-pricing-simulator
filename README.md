@@ -28,6 +28,9 @@ python3 -m http.server 8000 --directory src
 - Pricing Snapshot: `http://localhost:8000/pricing.html`
 - Price Decision Maker: `http://localhost:8000/decision.html`
 
+## Deployment
+- Vercel: `https://ai-pricing-simulator-qqih.vercel.app/`
+
 ## Assumptions
 - 환율: **1 USD = 1,450 KRW (기본값, UI에서 변경 가능)**
 - 토큰 구간: Small(1k/0.5k), Medium(5k/2k), Large(20k/5k)
